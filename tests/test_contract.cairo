@@ -2,8 +2,8 @@ use starknet::ContractAddress;
 
 use snforge_std::{declare, ContractClassTrait};
 
-use swaplace::IHelloStarknetSafeDispatcher;
-use swaplace::IHelloStarknetSafeDispatcherTrait;
+use swaplace::hello_starknet::IHelloStarknetSafeDispatcher;
+use swaplace::hello_starknet::IHelloStarknetSafeDispatcherTrait;
 
 fn deploy_contract(name: felt252) -> ContractAddress {
     let contract = declare(name);
