@@ -1,11 +1,14 @@
 fmt:
-	@scarb fmt 
+	scarb fmt 
 
 clean:
-	@scarb clean
+	scarb clean
 
 build: clean
-	@scarb build
+	scarb build
+
+test: 
+	snforge test
 
 deploy: build
 	@./scripts/deploy.sh
