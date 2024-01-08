@@ -1,6 +1,6 @@
 # Swaplace Starknet
 
-## Install dependencies
+## 💽 Install dependencies
 
 ### asdf
 - [asdf](https://asdf-vm.com/) - The multiple runtime version manager. See [asdf guide](https://asdf-vm.com/guide/getting-started.html) for more details.
