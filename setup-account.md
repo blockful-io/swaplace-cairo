@@ -2,9 +2,7 @@
 
 ## Install dependencies
 
-Install Starkli: 
-
-- [Starkli](https://book.starkli.rs/) - Starkli is a command line tool for interacting with Starknet.
+- [Starkli](https://book.starkli.rs/) - Command line tool for interacting with Starknet.
 
 If you're on Linux/macOS/WSL, you can install starkliup by running the following command:
 

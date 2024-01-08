@@ -1,5 +1,42 @@
 # Swaplace Starknet
 
+## Install dependencies
+
+### asdf
+- [asdf](https://asdf-vm.com/) - The multiple runtime version manager. See [asdf guide](https://asdf-vm.com/guide/getting-started.html) for more details.
+
+### Scarb
+
+- [Scarb](https://docs.swmansion.com/scarb/docs.html) - Cairo package manager.
+
+First, add the Scarb plugin to asdf:
+
+```bash
+asdf plugin add scarb
+```
+
+Install:
+
+```bash
+asdf install scarb 2.3.1
+asdf global scarb 2.3.1
+```
+
+### Starknet Foundry
+
+- [Starknet Foundry](https://foundry-rs.github.io/starknet-foundry/) - Toolchain for developing Starknet smart contracts. It helps with writing, deploying, and testing your smart contracts. It is inspired by Foundry.
+
+First, add the Starknet Foundry plugin to asdf:
+
+```bash
+asdf plugin add starknet-foundry
+```
+Install:
+
+```bash
+asdf install starknet-foundry 0.12.0
+```
+
 ## 🛠️ Build
 
 To build the project, run:
