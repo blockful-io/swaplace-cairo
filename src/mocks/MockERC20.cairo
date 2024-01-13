@@ -3,7 +3,10 @@ use starknet::ContractAddress;
 #[starknet::interface]
 trait IMockERC20<TContractState> {
     fn mint_to(ref self: TContractState, recipient: ContractAddress, amount: u256);
-    fn approve2(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
+    fn approve(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
+    fn transfer_from(
+        ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+    ) -> bool;
 }
 
 #[starknet::contract]
@@ -14,11 +17,8 @@ mod MockERC20 {
 
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
 
-    #[abi(embed_v0)]
     impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;
-    #[abi(embed_v0)]
     impl ERC20MetadataImpl = ERC20Component::ERC20MetadataImpl<ContractState>;
-    #[abi(embed_v0)]
     impl ERC20CamelOnlyImpl = ERC20Component::ERC20CamelOnlyImpl<ContractState>;
     impl ERC20InternalImpl = ERC20Component::InternalImpl<ContractState>;
 
@@ -49,10 +49,16 @@ mod MockERC20 {
             self.erc20._mint(recipient, amount);
         }
 
-        fn approve2(ref self: ContractState, spender: ContractAddress, amount: u256) -> bool {
+        fn approve(ref self: ContractState, spender: ContractAddress, amount: u256) -> bool {
             let caller = get_caller_address();
             self.erc20._approve(caller, spender, amount);
             true
+        }
+
+        fn transfer_from(
+            ref self: ContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+        ) -> bool {
+            self.erc20.transfer_from(sender, recipient, amount)
         }
     }
 }

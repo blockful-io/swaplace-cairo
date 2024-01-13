@@ -3,7 +3,8 @@ use starknet::ContractAddress;
 #[starknet::interface]
 trait IMockERC721<TContractState> {
     fn mint_to(ref self: TContractState, recipient: ContractAddress, token_id: u256);
-    fn approve2(ref self: TContractState, to: ContractAddress, token_id: u256);
+    fn approve(ref self: TContractState, to: ContractAddress, token_id: u256);
+    fn transfer_from(ref self: TContractState, from: ContractAddress, to: ContractAddress, token_id: u256);
 }
 
 #[starknet::contract]
@@ -17,13 +18,9 @@ mod MockERC721 {
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
 
     // ERC721
-    #[abi(embed_v0)]
     impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
-    #[abi(embed_v0)]
     impl ERC721MetadataImpl = ERC721Component::ERC721MetadataImpl<ContractState>;
-    #[abi(embed_v0)]
     impl ERC721CamelOnly = ERC721Component::ERC721CamelOnlyImpl<ContractState>;
-    #[abi(embed_v0)]
     impl ERC721MetadataCamelOnly =
         ERC721Component::ERC721MetadataCamelOnlyImpl<ContractState>;
     impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
@@ -50,7 +47,7 @@ mod MockERC721 {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, recipient: ContractAddress) {
+    fn constructor(ref self: ContractState) {
         let name = 'MockERC721';
         let symbol = 'ERC721';
 
@@ -63,12 +60,19 @@ mod MockERC721 {
             self.erc721._mint(recipient, token_id);
         }
 
-        fn approve2(ref self: ContractState, to: ContractAddress, token_id: u256) {
+        fn approve(ref self: ContractState, to: ContractAddress, token_id: u256) {
             let owner = self.erc721._owner_of(token_id);
 
             let caller = get_caller_address();
             assert(owner == caller || self.is_approved_for_all(owner, caller), 'UNAUTHORIZED');
             self.erc721._approve(to, token_id);
+        }
+
+        fn transfer_from(ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256) {
+            assert(
+                self.erc721._is_approved_or_owner(get_caller_address(), token_id), 'UNAUTHORIZED'
+            );
+            self.erc721._transfer(from, to, token_id);
         }
     }
 }

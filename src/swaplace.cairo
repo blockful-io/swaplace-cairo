@@ -31,7 +31,7 @@ trait ISwaplace<TContractState> {
 #[starknet::interface]
 trait ITransfer<TContractState> {
     // external
-    fn transferFrom(
+    fn transfer_from(
         ref self: TContractState, from: ContractAddress, to: ContractAddress, amount_or_id: u256
     );
 }
@@ -147,7 +147,7 @@ mod Swaplace {
             // if (swap.allowed != address(0) && swap.allowed != msg.sender)
             // revert InvalidAddress(msg.sender);
 
-            assert(swap.allowed == get_caller_address(), 'InvalidAddress');
+            assert(swap.allowed.is_zero() || swap.allowed == get_caller_address(), 'InvalidAddress');
             assert(swap.expiry >= get_block_timestamp(), 'InvalidExpiry');
 
             swap.expiry = 0;
@@ -159,10 +159,8 @@ mod Swaplace {
                     break;
                 }
                 let asset = self.swaps_biding.read((swap_id, i));
-                // ERC20ABIDispatcher { contract_address: asset.address }
-                //     .transfer_from(get_caller_address(), swap.owner, asset.amount_or_id);
                 ITransferDispatcher { contract_address: asset.addr }
-                    .transferFrom(get_caller_address(), swap.owner, asset.amount_or_id);
+                    .transfer_from(get_caller_address(), swap.owner, asset.amount_or_id);
                 i += 1;
             };
 
@@ -172,10 +170,8 @@ mod Swaplace {
                     break;
                 }
                 let asset = self.swaps_asking.read((swap_id, i));
-                // ERC20ABIDispatcher { contract_address: asset.address }
-                //     .transfer_from(get_caller_address(), swap.owner, asset.amount_or_id);
                 ITransferDispatcher { contract_address: asset.addr }
-                    .transferFrom(get_caller_address(), swap.owner, asset.amount_or_id);
+                    .transfer_from(get_caller_address(), swap.owner, asset.amount_or_id);
                 i += 1;
             };
 
