@@ -147,7 +147,9 @@ mod Swaplace {
             // if (swap.allowed != address(0) && swap.allowed != msg.sender)
             // revert InvalidAddress(msg.sender);
 
-            assert(swap.allowed.is_zero() || swap.allowed == get_caller_address(), 'InvalidAddress');
+            assert(
+                swap.allowed.is_zero() || swap.allowed == get_caller_address(), 'InvalidAddress'
+            );
             assert(swap.expiry >= get_block_timestamp(), 'InvalidExpiry');
 
             swap.expiry = 0;

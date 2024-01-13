@@ -259,8 +259,6 @@ mod SwaplaceTests {
             #[test]
             #[should_panic(expected: ('InvalidExpiry',))]
             fn test_should_revert_when_expiry_is_smaller_than_block_timestamp() {
-
-
                 let (swaplace, mock_erc20, mock_erc721) = setup();
                 let (mut swap, biding, asking) = mock_swap(
                     mock_erc20.contract_address, mock_erc721.contract_address
@@ -272,7 +270,7 @@ mod SwaplaceTests {
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
-                
+
                 stop_warp(CheatTarget::One(swaplace.contract_address));
             }
 
@@ -369,9 +367,8 @@ mod SwaplaceTests {
                 start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
                 swaplace.accept_swap(swaplace.total_swaps());
                 stop_prank(CheatTarget::One(swaplace.contract_address));
-
-                // let swap_result = swaplace.get_swap(swaplace.total_swaps());
-                // assert(swap_result.expiry == 0, 'err expiry');
+            // let swap_result = swaplace.get_swap(swaplace.total_swaps());
+            // assert(swap_result.expiry == 0, 'err expiry');
             }
 
             #[test]

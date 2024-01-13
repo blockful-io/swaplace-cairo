@@ -4,7 +4,9 @@ use starknet::ContractAddress;
 trait IMockERC721<TContractState> {
     fn mint_to(ref self: TContractState, recipient: ContractAddress, token_id: u256);
     fn approve(ref self: TContractState, to: ContractAddress, token_id: u256);
-    fn transfer_from(ref self: TContractState, from: ContractAddress, to: ContractAddress, token_id: u256);
+    fn transfer_from(
+        ref self: TContractState, from: ContractAddress, to: ContractAddress, token_id: u256
+    );
 }
 
 #[starknet::contract]
@@ -21,8 +23,7 @@ mod MockERC721 {
     impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
     impl ERC721MetadataImpl = ERC721Component::ERC721MetadataImpl<ContractState>;
     impl ERC721CamelOnly = ERC721Component::ERC721CamelOnlyImpl<ContractState>;
-    impl ERC721MetadataCamelOnly =
-        ERC721Component::ERC721MetadataCamelOnlyImpl<ContractState>;
+    impl ERC721MetadataCamelOnly = ERC721Component::ERC721MetadataCamelOnlyImpl<ContractState>;
     impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
 
     // SRC5
@@ -68,7 +69,9 @@ mod MockERC721 {
             self.erc721._approve(to, token_id);
         }
 
-        fn transfer_from(ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256) {
+        fn transfer_from(
+            ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256
+        ) {
             assert(
                 self.erc721._is_approved_or_owner(get_caller_address(), token_id), 'UNAUTHORIZED'
             );

@@ -56,7 +56,10 @@ mod MockERC20 {
         }
 
         fn transfer_from(
-            ref self: ContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+            ref self: ContractState,
+            sender: ContractAddress,
+            recipient: ContractAddress,
+            amount: u256
         ) -> bool {
             self.erc20.transfer_from(sender, recipient, amount)
         }
