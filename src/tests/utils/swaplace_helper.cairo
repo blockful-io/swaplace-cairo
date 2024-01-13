@@ -10,7 +10,7 @@ use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
 fn setup() -> (ISwaplaceDispatcher, IMockERC20Dispatcher, IMockERC721Dispatcher) {
     let swaplace = deploy_swaplace();
     let mock_erc20 = deploy_mock_erc20();
-    let mock_erc721 = deploy_mock_erc721(OWNER());
+    let mock_erc721 = deploy_mock_erc721();
     (swaplace, mock_erc20, mock_erc721)
 }
 
@@ -26,7 +26,7 @@ fn mock_swap(
     compose_swap(
         OWNER(),
         ZERO(),
-        get_block_timestamp() * 2,
+        1000, // get_block_timestamp() * 2
         biding_addr.span(),
         biding_amount_or_id.span(),
         asking_addr.span(),
@@ -120,9 +120,9 @@ fn deploy_mock_erc20() -> IMockERC20Dispatcher {
     IMockERC20Dispatcher { contract_address: address }
 }
 
-fn deploy_mock_erc721(recipent: ContractAddress) -> IMockERC721Dispatcher {
+fn deploy_mock_erc721() -> IMockERC721Dispatcher {
     let erc721 = declare('MockERC721');
-    let mut calldata = array![recipent.into()];
+    let mut calldata = array![];
     let address = erc721.deploy(@calldata).unwrap();
     IMockERC721Dispatcher { contract_address: address }
 }
