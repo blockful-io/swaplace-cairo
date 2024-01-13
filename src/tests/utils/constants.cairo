@@ -13,5 +13,5 @@ fn DEPLOYER() -> ContractAddress {
 }
 
 fn ZERO() -> ContractAddress {
-    contract_address_const::<'ZERO'>()
+    Zeroable::zero()
 }
