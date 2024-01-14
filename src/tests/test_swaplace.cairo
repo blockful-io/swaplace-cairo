@@ -476,6 +476,8 @@ mod SwaplaceTests {
             fn test_should_revert_when_calling_accept_swap_twice() {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
 
+                start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry * 2);
+
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
@@ -489,6 +491,8 @@ mod SwaplaceTests {
                 swaplace.accept_swap(swaplace.total_swaps());
 
                 stop_prank(CheatTarget::One(swaplace.contract_address));
+
+                stop_warp(CheatTarget::One(swaplace.contract_address));
             }
 
             #[test]
@@ -610,7 +614,7 @@ mod SwaplaceTests {
             use swaplace::swaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait, Swap, Asset};
             use swaplace::mocks::MockERC20::{IMockERC20Dispatcher, IMockERC20DispatcherTrait};
             use swaplace::mocks::MockERC721::{IMockERC721Dispatcher, IMockERC721DispatcherTrait};
-            use snforge_std::{CheatTarget, start_prank, stop_prank};
+            use snforge_std::{CheatTarget, start_prank, stop_prank, start_warp, stop_warp};
             use openzeppelin::token::erc20::interface::{IERC20Metadata, IERC20, IERC20Camel};
 
             #[test]
@@ -627,14 +631,17 @@ mod SwaplaceTests {
             }
 
             #[test]
-            #[should_panic(expected: ('InvalidAddress',))]
+            #[should_panic(expected: ('InvalidExpiry',))]
             fn test_should_not_be_able_to_accept_swap_a_canceled_a_swap() {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
+                start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry * 2);
 
                 let last_swap = swaplace.total_swaps();
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 swaplace.accept_swap(last_swap);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
+
+                stop_warp(CheatTarget::One(swaplace.contract_address));
             }
         }
 
