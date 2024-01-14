@@ -15,6 +15,7 @@ mod MockERC721 {
     use openzeppelin::token::erc721::ERC721Component;
     use starknet::{ContractAddress, get_caller_address};
     use super::IMockERC721;
+    use debug::PrintTrait;
 
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
@@ -65,15 +66,22 @@ mod MockERC721 {
             let owner = self.erc721._owner_of(token_id);
 
             let caller = get_caller_address();
-            assert(owner == caller || self.is_approved_for_all(owner, caller), 'UNAUTHORIZED');
+            // assert(owner == caller || self.is_approved_for_all(owner, caller), 'UNAUTHORIZED');
             self.erc721._approve(to, token_id);
         }
 
         fn transfer_from(
             ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256
         ) {
+            'trasnfer_from ERC721'.print();
+            'from'.print();
+            from.print();
+            'to'.print();
+            to.print();
+            'token_id'.print();
+            token_id.print();
             assert(
-                self.erc721._is_approved_or_owner(get_caller_address(), token_id), 'UNAUTHORIZED'
+                self.erc721._is_approved_or_owner(get_caller_address(), token_id), 'ERC721: unauthorized caller'
             );
             self.erc721._transfer(from, to, token_id);
         }

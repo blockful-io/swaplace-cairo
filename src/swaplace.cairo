@@ -114,7 +114,7 @@ mod Swaplace {
                     break;
                 }
                 // TODO: 
-                self.swaps_biding.write((swap_id, i), *biding.at(0));
+                self.swaps_biding.write((swap_id, i), *biding.at(i.try_into().unwrap()));
                 i += 1;
             };
 
@@ -124,7 +124,7 @@ mod Swaplace {
                     break;
                 }
                 // TODO: 
-                self.swaps_asking.write((swap_id, i), *asking.at(0));
+                self.swaps_asking.write((swap_id, i), *asking.at(i.try_into().unwrap()));
                 i += 1;
             };
 
@@ -157,10 +157,10 @@ mod Swaplace {
 
             let mut i: u64 = 0;
             loop {
-                if i == swap.biding_count {
+                if i == swap.asking_count {
                     break;
                 }
-                let asset = self.swaps_biding.read((swap_id, i));
+                let asset = self.swaps_asking.read((swap_id, i));
                 ITransferDispatcher { contract_address: asset.addr }
                     .transfer_from(get_caller_address(), swap.owner, asset.amount_or_id);
                 i += 1;
@@ -168,12 +168,12 @@ mod Swaplace {
 
             let mut i: u64 = 0;
             loop {
-                if i == swap.asking_count {
+                if i == swap.biding_count {
                     break;
                 }
-                let asset = self.swaps_asking.read((swap_id, i));
+                let asset = self.swaps_biding.read((swap_id, i));
                 ITransferDispatcher { contract_address: asset.addr }
-                    .transfer_from(get_caller_address(), swap.owner, asset.amount_or_id);
+                    .transfer_from(swap.owner, get_caller_address(), asset.amount_or_id);
                 i += 1;
             };
 
