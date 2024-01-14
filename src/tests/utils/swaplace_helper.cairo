@@ -2,7 +2,8 @@ use snforge_std::{declare, ContractClassTrait};
 use snforge_std::{CheatTarget, start_prank, stop_prank};
 
 use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
-use swaplace::swaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait, Swap, Asset};
+use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
+use swaplace::Swaplace::{Swap, Asset};
 use swaplace::mocks::MockERC20::{IMockERC20Dispatcher, IMockERC20DispatcherTrait};
 use swaplace::mocks::MockERC721::{IMockERC721Dispatcher, IMockERC721DispatcherTrait};
 use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};

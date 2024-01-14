@@ -15,32 +15,16 @@ struct Swap {
     asking_count: u64,
 }
 
-#[starknet::interface]
-trait ISwaplace<TContractState> {
-    // getters
-    fn get_swap(self: @TContractState, swap_id: u256) -> Swap;
-    fn total_swaps(self: @TContractState) -> u256;
-    // external
-    fn create_swap(
-        ref self: TContractState, swap: Swap, biding: Span<Asset>, asking: Span<Asset>
-    ) -> u256;
-    fn accept_swap(ref self: TContractState, swap_id: u256) -> bool;
-    fn cancel_swap(ref self: TContractState, swap_id: u256);
-}
-
-#[starknet::interface]
-trait ITransfer<TContractState> {
-    // external
-    fn transfer_from(
-        ref self: TContractState, from: ContractAddress, to: ContractAddress, amount_or_id: u256
-    );
-}
-
 #[starknet::contract]
 mod Swaplace {
-    use super::{ISwaplace, Swap, Asset};
-    use super::{ITransfer, ITransferDispatcher, ITransferDispatcherTrait};
+    use super::{Asset, Swap};
     use starknet::{ContractAddress, get_caller_address, get_block_timestamp};
+    use swaplace::interfaces::{
+        ISwaplace::ISwaplace, ITransfer::{ITransferDispatcher, ITransferDispatcherTrait},
+    };
+
+    // TODO: Remove PrintTrait
+    use debug::PrintTrait;
 
     #[storage]
     struct Storage {
@@ -50,6 +34,7 @@ mod Swaplace {
         swaps_asking: LegacyMap<(u256, u64), Asset>,
     }
 
+    // Events of Swaplace
     #[event]
     #[derive(Copy, Drop, starknet::Event, PartialEq)]
     enum Event {
@@ -58,6 +43,7 @@ mod Swaplace {
         SwapCanceled: SwapCanceled,
     }
 
+    // Emitted when a new Swap is created.
     #[derive(Copy, Drop, starknet::Event, PartialEq)]
     struct SwapCreated {
         #[key]
@@ -68,6 +54,7 @@ mod Swaplace {
         expiry: u64,
     }
 
+    // Emitted when a Swap is accepted.
     #[derive(Copy, Drop, starknet::Event, PartialEq)]
     struct SwapAccepted {
         #[key]
@@ -76,6 +63,7 @@ mod Swaplace {
         swap_id: u256,
     }
 
+    // Emitted when a Swap is canceled.
     #[derive(Copy, Drop, starknet::Event, PartialEq)]
     struct SwapCanceled {
         #[key]
@@ -84,22 +72,21 @@ mod Swaplace {
         swap_id: u256,
     }
 
+    // Errors of Swaplace
+    mod Errors {
+        const INVALID_ADDRESS: felt252 = 'Swaplace: Invalid address';
+        const INVALID_EXPIRY: felt252 = 'Swaplace: Invalid expiry time';
+        const INVALID_ASSETS_LENGTH: felt252 = 'Swaplace: Invalid assets length';
+    }
+
     #[abi(embed_v0)]
     impl ISwaplaceImpl of ISwaplace<ContractState> {
-        fn get_swap(self: @ContractState, swap_id: u256) -> Swap {
-            self.swaps.read(swap_id)
-        }
-
-        fn total_swaps(self: @ContractState) -> u256 {
-            self.total_swaps.read()
-        }
-
         fn create_swap(
             ref self: ContractState, swap: Swap, biding: Span<Asset>, asking: Span<Asset>
         ) -> u256 {
-            assert(swap.owner == get_caller_address(), 'InvalidAddress');
-            assert(swap.expiry >= get_block_timestamp(), 'InvalidExpiry');
-            assert(biding.len() > 0 && asking.len() > 0, 'InvalidAssetsLength');
+            assert(swap.owner == get_caller_address(), Errors::INVALID_ADDRESS);
+            assert(swap.expiry >= get_block_timestamp(), Errors::INVALID_EXPIRY);
+            assert(biding.len() > 0 && asking.len() > 0, Errors::INVALID_ASSETS_LENGTH);
             // TODO: len
 
             let mut swap_id = self.total_swaps.read();
@@ -148,9 +135,9 @@ mod Swaplace {
             // revert InvalidAddress(msg.sender);
 
             assert(
-                swap.allowed.is_zero() || swap.allowed == get_caller_address(), 'InvalidAddress'
+                swap.allowed.is_zero() || swap.allowed == get_caller_address(), Errors::INVALID_ADDRESS
             );
-            assert(swap.expiry >= get_block_timestamp(), 'InvalidExpiry');
+            assert(swap.expiry >= get_block_timestamp(), Errors::INVALID_EXPIRY);
 
             swap.expiry = 0;
             self.swaps.write(swap_id, swap);
@@ -184,12 +171,30 @@ mod Swaplace {
         fn cancel_swap(ref self: ContractState, swap_id: u256) {
             let mut swap = self.swaps.read(swap_id);
 
-            assert(swap.owner == get_caller_address(), 'InvalidAddress');
-            assert(swap.expiry >= get_block_timestamp(), 'InvalidExpiry');
+            assert(swap.owner == get_caller_address(), Errors::INVALID_ADDRESS);
+            assert(swap.expiry >= get_block_timestamp(), Errors::INVALID_EXPIRY);
 
             swap.expiry = 0;
             self.swaps.write(swap_id, swap);
             self.emit(SwapCanceled { user: get_caller_address(), swap_id });
+        }
+
+        fn get_swap(self: @ContractState, swap_id: u256) -> Swap {
+            self.swaps.read(swap_id)
+        }
+    }
+
+    #[generate_trait]
+    impl InternalImpl of InternalTrait {
+        // Retrieves the total number of swaps that have been created in the contract.
+        //
+        // Returns:
+        // - `u256`: The total number of swaps.
+        //
+        // NOTE: This function provides the count of all swaps, including those that have been accepted,
+        // canceled, or expired. It does not filter based on the current state of the swaps.
+        fn _total_swaps(self: @ContractState) -> u256 {
+            self.total_swaps.read()
         }
     }
 }

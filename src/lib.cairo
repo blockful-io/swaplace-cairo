@@ -1,4 +1,9 @@
-mod swaplace;
+mod Swaplace;
+
+mod interfaces {
+    mod ISwaplace;
+    mod ITransfer;
+}
 
 mod mocks {
     mod MockERC20;

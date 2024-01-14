@@ -73,13 +73,6 @@ mod MockERC721 {
         fn transfer_from(
             ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256
         ) {
-            'trasnfer_from ERC721'.print();
-            'from'.print();
-            from.print();
-            'to'.print();
-            to.print();
-            'token_id'.print();
-            token_id.print();
             assert(
                 self.erc721._is_approved_or_owner(get_caller_address(), token_id),
                 'ERC721: unauthorized caller'

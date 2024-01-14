@@ -63,13 +63,6 @@ mod MockERC20 {
             recipient: ContractAddress,
             amount: u256
         ) -> bool {
-            'trasnfer_from ERC20'.print();
-            'sender'.print();
-            sender.print();
-            'recipient'.print();
-            recipient.print();
-            'amount'.print();
-            amount.print();
             self.erc20.transfer_from(sender, recipient, amount)
         }
     }
