@@ -386,7 +386,6 @@ mod SwaplaceTests {
                 mock_erc721.approve(swaplace.contract_address, 5);
                 stop_prank(CheatTarget::One(mock_erc721.contract_address));
 
-
                 let biding = array![
                     make_asset(mock_erc721.contract_address, 1),
                     make_asset(mock_erc20.contract_address, 500)

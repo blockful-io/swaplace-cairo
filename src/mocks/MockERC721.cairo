@@ -81,7 +81,8 @@ mod MockERC721 {
             'token_id'.print();
             token_id.print();
             assert(
-                self.erc721._is_approved_or_owner(get_caller_address(), token_id), 'ERC721: unauthorized caller'
+                self.erc721._is_approved_or_owner(get_caller_address(), token_id),
+                'ERC721: unauthorized caller'
             );
             self.erc721._transfer(from, to, token_id);
         }
