@@ -462,6 +462,12 @@ mod SwaplaceTests {
             fn test_should_be_able_to_accept_swap_as_1_1_swap() {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
 
+                let mut erc20_balance = mock_erc20.balance_of(ACCEPTEE());
+                let mut token_1_owner = mock_erc721.owner_of(1);
+
+                assert(erc20_balance == 1000, 'err wrong accepte balance');
+                assert(token_1_owner == OWNER(), 'err wrong owner');
+
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
@@ -469,8 +475,12 @@ mod SwaplaceTests {
                 start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
                 swaplace.accept_swap(swap_id);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
-                let swap_result = swaplace.get_swap(swap_id);
-                assert(swap_result.expiry == 0, 'err expiry');
+
+                erc20_balance = mock_erc20.balance_of(OWNER());
+                token_1_owner = mock_erc721.owner_of(1);
+
+                assert(erc20_balance == 1000, 'err wrong owner balance');
+                assert(token_1_owner == ACCEPTEE(), 'err wrong owner');
             }
 
             #[test]
@@ -500,6 +510,16 @@ mod SwaplaceTests {
                 swap.biding_count = 2;
                 swap.asking_count = 2;
 
+                let mut erc20_balance_owner = mock_erc20.balance_of(OWNER());
+                let mut erc20_balance_acceptee = mock_erc20.balance_of(ACCEPTEE());
+                let mut owner_of_nft_1 = mock_erc721.owner_of(1);
+                let mut owner_of_nft_5_ = mock_erc721.owner_of(5);
+
+                assert(erc20_balance_owner == 500, 'err wrong owner balance');
+                assert(erc20_balance_acceptee == 1000, 'err wrong accepte balance');
+                assert(owner_of_nft_1 == OWNER(), 'err wrong nft 1 owner');
+                assert(owner_of_nft_5_ == ACCEPTEE(), 'err wrong nft 5 owner');
+
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding.span(), asking.span());
                 stop_prank(CheatTarget::One(swaplace.contract_address));
@@ -513,29 +533,31 @@ mod SwaplaceTests {
                 swaplace.accept_swap(swap_id);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                let swap_result = swaplace.get_swap(swap_id);
-                assert(swap_result.expiry == 0, 'err expiry');
+                erc20_balance_owner = mock_erc20.balance_of(OWNER());
+                erc20_balance_acceptee = mock_erc20.balance_of(ACCEPTEE());
+                owner_of_nft_1 = mock_erc721.owner_of(1);
+                owner_of_nft_5_ = mock_erc721.owner_of(5);
+
+                assert(erc20_balance_owner == 1000, 'err wrong owner balance');
+                assert(erc20_balance_acceptee == 500, 'err wrong accepte balance');
+                assert(owner_of_nft_1 == ACCEPTEE(), 'err wrong nft 1 owner');
+                assert(owner_of_nft_5_ == OWNER(), 'err wrong nft 5 owner');
             }
 
             #[test]
             fn test_should_be_able_to_accept_swap_as_P2P_swap() {
                 let (_, _, _, swaplace, mock_erc20, mock_erc721) = before_each();
 
-                mock_erc20.mint_to(OWNER(), 1000);
-                mock_erc721.mint_to(ACCEPTEE(), 10);
-
-                start_prank(CheatTarget::One(mock_erc20.contract_address), OWNER());
-                mock_erc20.approve(swaplace.contract_address, 1000);
-                stop_prank(CheatTarget::One(mock_erc20.contract_address));
-
-                start_prank(CheatTarget::One(mock_erc721.contract_address), ACCEPTEE());
-                mock_erc721.approve(swaplace.contract_address, 10);
-                stop_prank(CheatTarget::One(mock_erc721.contract_address));
-
                 let (mut swap, biding, asking) = mock_swap(
                     mock_erc20.contract_address, mock_erc721.contract_address
                 );
                 swap.allowed = ACCEPTEE();
+
+                let erc20_balance = mock_erc20.balance_of(ACCEPTEE());
+                let mut token_1_owner = mock_erc721.owner_of(1);
+
+                assert(erc20_balance == 1000, 'err wrong accepte balance');
+                assert(token_1_owner == OWNER(), 'err wrong owner');
 
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
@@ -550,8 +572,13 @@ mod SwaplaceTests {
                 swaplace.accept_swap(swap_id);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                let swap_result = swaplace.get_swap(swap_id);
-                assert(swap_result.expiry == 0, 'err expiry');
+                let erc20_balance_owner = mock_erc20.balance_of(OWNER());
+                let erc20_balance_acceptee = mock_erc20.balance_of(ACCEPTEE());
+                token_1_owner = mock_erc721.owner_of(1);
+
+                assert(erc20_balance_owner == 50, 'err wrong owner balance');
+                assert(erc20_balance_acceptee == 950, 'err wrong acceptee balance');
+                assert(token_1_owner == ACCEPTEE(), 'err wrong owner');
             }
         }
 

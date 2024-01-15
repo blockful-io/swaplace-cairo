@@ -7,6 +7,7 @@ trait IMockERC20<TContractState> {
     fn transfer_from(
         ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
     ) -> bool;
+    fn balance_of(self: @TContractState, account: ContractAddress) -> u256;
 }
 
 #[starknet::contract]
@@ -62,6 +63,10 @@ mod MockERC20 {
             amount: u256
         ) -> bool {
             self.erc20.transfer_from(sender, recipient, amount)
+        }
+
+        fn balance_of(self: @ContractState, account: ContractAddress) -> u256 {
+            self.erc20.balance_of(account)
         }
     }
 }

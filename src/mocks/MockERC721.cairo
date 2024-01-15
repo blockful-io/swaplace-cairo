@@ -7,6 +7,7 @@ trait IMockERC721<TContractState> {
     fn transfer_from(
         ref self: TContractState, from: ContractAddress, to: ContractAddress, token_id: u256
     );
+    fn owner_of(self: @TContractState, token_id: u256) -> ContractAddress;
 }
 
 #[starknet::contract]
@@ -77,6 +78,10 @@ mod MockERC721 {
                 'ERC721: unauthorized caller'
             );
             self.erc721._transfer(from, to, token_id);
+        }
+
+        fn owner_of(self: @ContractState, token_id: u256) -> ContractAddress {
+            self.erc721.owner_of(token_id)
         }
     }
 }
