@@ -678,70 +678,75 @@ mod SwaplaceTests {
             }
         }
     }
-// mod fetching_swaps {
+    mod fetching_swaps {
 
-//     use core::array::ArrayTrait;
-//     use super::{setup, mock_swap, compose_swap, OWNER, ZERO, ACCEPTEE};
-//     use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
-//     use swaplace::Swaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait, Swap, Asset};
-//     use swaplace::mocks::MockERC20::{IMockERC20Dispatcher, IMockERC20DispatcherTrait};
-//     use swaplace::mocks::MockERC721::{IMockERC721Dispatcher, IMockERC721DispatcherTrait};
-//     use snforge_std::{CheatTarget, start_prank, stop_prank};
+        use core::array::ArrayTrait;
+        use swaplace::tests::utils::swaplace_helper::{
+            setup, mock_swap, make_asset, make_swap, compose_swap
+        };
+        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+        use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
+        use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
+        use swaplace::Swaplace::{Swap, Asset};
+        use swaplace::mocks::MockERC20::{IMockERC20Dispatcher, IMockERC20DispatcherTrait};
+        use swaplace::mocks::MockERC721::{IMockERC721Dispatcher, IMockERC721DispatcherTrait};
+        use snforge_std::{CheatTarget, start_prank, stop_prank, start_warp, stop_warp};
+        use openzeppelin::token::erc20::interface::{IERC20Metadata, IERC20, IERC20Camel};
 
-//     fn before_each() -> (Swap, Span<Asset>, Span<Asset>, ISwaplaceDispatcher, IMockERC20Dispatcher, IMockERC721Dispatcher) {
-//         let (swaplace, mock_erc20, mock_erc721) = setup();
+        fn before_each() -> ISwaplaceDispatcher {
+            let (swaplace, mock_erc20, mock_erc721) = setup();
 
-//         mock_erc721.mint_to(OWNER(), 1);
-//         mock_erc20.mint_to(ACCEPTEE(), 1000);
+            mock_erc721.mint_to(OWNER(), 1);
+            mock_erc20.mint_to(ACCEPTEE(), 1000);
 
-//         let biding_addr = array![mock_erc721.contract_address];
-//         let biding_amount_or_id = array![1];
+            let biding_addr = array![mock_erc721.contract_address];
+            let biding_amount_or_id = array![1];
 
-//         let asking_addr = array![mock_erc20.contract_address];
-//         let asking_amount_or_id = array![1000];
+            let asking_addr = array![mock_erc20.contract_address];
+            let asking_amount_or_id = array![1000];
 
-//         let (swap, biding, asking) = compose_swap(
-//             OWNER(),
-//             ZERO(),
-//             get_block_timestamp() * 2,
-//             biding_addr.span(),
-//             biding_amount_or_id.span(),
-//             asking_addr.span(),
-//             asking_amount_or_id.span(),
-//         );
+            let (swap, biding, asking) = compose_swap(
+                OWNER(),
+                ZERO(),
+                1000, // TODO: get_block_timestamp() * 2
+                biding_addr.span(),
+                biding_amount_or_id.span(),
+                asking_addr.span(),
+                asking_amount_or_id.span(),
+            );
 
-//         start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
-//         swaplace.create_swap(swap, biding, asking);
-//         stop_prank(CheatTarget::One(swaplace.contract_address));
+            start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
+            swaplace.create_swap(swap, biding, asking);
+            stop_prank(CheatTarget::One(swaplace.contract_address));
 
-//         (swap, biding, asking, swaplace, mock_erc20, mock_erc721)
-//     }
+            swaplace
+        }
 
-//     #[test]
-//     fn test_should_be_able_to_get_swap() {
-//         let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
+        #[test]
+        fn test_should_be_able_to_get_swap() {
+            let swaplace = before_each();
 
-//         let last_swap =  swaplace.total_swaps();
-//         let fetched_swap =  swaplace.get_swap(last_swap);
+            // let last_swap =  swaplace.get_total_swaps();
+            let fetched_swap =  swaplace.get_swap(1); // TODO:
 
-//         // expect(fetchedSwap.owner).not.to.be.equals(zero_address);
-//         // // swap.allowed can be the zero address and shoul not be trusted for validation
-//         // expect(fetchedSwap.expiry).not.to.be.equals(0);
-//         // expect(fetchedSwap.biding.length).to.be.greaterThan(0);
-//         // expect(fetchedSwap.asking.length).to.be.greaterThan(0);
-//     }
+            assert(fetched_swap.owner != ZERO(), 'err owner');
+            // swap.allowed can be the zero address and shoul not be trusted for validation
+            assert(fetched_swap.expiry != 0, 'err expiry');
+            assert(fetched_swap.biding_count > 0, 'err biding_count');
+            assert(fetched_swap.asking_count > 0, 'err asking_count');
+        }
 
-//     #[test]
-//     fn test_should_return_empty_with_get_swap_when_swap_is_non_existant() {
-//         let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
+        #[test]
+        fn test_should_return_empty_with_get_swap_when_swap_is_non_existant() {
+            let swaplace = before_each();
 
-//         let imaginary_swap_id = 777;
-//         let fetched_swap =  swaplace.get_swap(imaginary_swap_id);
+            let imaginary_swap_id = 777;
+            let fetched_swap =  swaplace.get_swap(imaginary_swap_id);
 
-//         // swap.allowed can be the zero address and shoul not be trusted for validation
-//         // expect(fetchedSwap.owner).to.be.deep.equals(zero_address);
-//         // expect(fetchedSwap.allowed).to.be.deep.equals(zero_address);
-//         // expect(fetchedSwap.expiry).to.be.deep.equals(0);
-//     }
-// }
+            assert(fetched_swap.owner == ZERO(), 'err owner');
+            // swap.allowed can be the zero address and shoul not be trusted for validation
+            assert(fetched_swap.allowed == ZERO(), 'err allowed');
+            assert(fetched_swap.expiry == 0, 'err expiry');
+        }
+    }
 }
