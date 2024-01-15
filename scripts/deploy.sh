@@ -12,10 +12,10 @@ GREEN='\e[32m'
 RESET='\e[0m'
 
 # Declare all contracts
-echo -e "$GREEN\n==> Declaring HelloStarknet$RESET"
-HELLO_STARKNET_CLASS_HASH=$(starkli declare --watch ./target/dev/swaplace_HelloStarknet.contract_class.json)
-echo -e $GREEN$HELLO_STARKNET_CLASS_HASH
+echo -e "$GREEN\n==> Declaring Swaplace$RESET"
+SWAPLACE_CLASS_HASH=$(starkli declare --watch ./target/dev/swaplace_Swaplace.contract_class.json)
+echo -e $GREEN$SWAPLACE_CLASS_HASH
 
-echo -e "$GREEN\n==> Deploying HelloStarknet$RESET"
-HELLO_STARKNET_ADDRESS=$(starkli deploy --watch $HELLO_STARKNET_CLASS_HASH)
-echo -e $GREEN$HELLO_STARKNET_ADDRESS$RESET
+echo -e "$GREEN\n==> Deploying Swaplace$RESET"
+SWAPLACE_ADDRESS=$(starkli deploy --watch $SWAPLACE_CLASS_HASH)
+echo -e $GREEN$SWAPLACE_ADDRESS$RESET
