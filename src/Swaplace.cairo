@@ -129,7 +129,10 @@ mod Swaplace {
         fn accept_swap(ref self: ContractState, swap_id: u256) -> bool {
             let mut swap = self.swaps.read(swap_id);
 
-            assert(!(swap.allowed.is_non_zero() && swap.allowed != get_caller_address()), Errors::INVALID_ADDRESS);
+            assert(
+                !(swap.allowed.is_non_zero() && swap.allowed != get_caller_address()),
+                Errors::INVALID_ADDRESS
+            );
             assert(swap.expiry >= get_block_timestamp(), Errors::INVALID_EXPIRY);
 
             swap.expiry = 0;

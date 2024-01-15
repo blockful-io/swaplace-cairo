@@ -5,12 +5,58 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
+            use swaplace::tests::utils::constants::{
+                ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
+            };
 
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
-            use swaplace::Swaplace::{Swap, Asset};
-            use snforge_std::{CheatTarget, start_prank, stop_prank};
+            use swaplace::Swaplace::{Swaplace, Swap, Asset};
+            use snforge_std::{
+                CheatTarget, start_prank, stop_prank, spy_events, SpyOn, EventSpy, EventAssertions
+            };
+
+            #[test]
+            fn test_should_be_emit_event_when_swap_is_created() {
+                let (swaplace, mock_erc20, mock_erc721) = setup();
+
+                let biding_addr = array![mock_erc20.contract_address];
+                let biding_amount_or_id = array![50];
+                let asking_addr = array![mock_erc20.contract_address];
+                let asking_amount_or_id = array![50];
+
+                let (swap, biding, asking) = compose_swap(
+                    OWNER(),
+                    ZERO(),
+                    MOCK_BLOCK_TIMESTAMP,
+                    biding_addr.span(),
+                    biding_amount_or_id.span(),
+                    asking_addr.span(),
+                    asking_amount_or_id.span(),
+                );
+
+                let mut spy_events = spy_events(SpyOn::One(swaplace.contract_address));
+                start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
+                let swap_id = swaplace.create_swap(swap, biding, asking);
+                stop_prank(CheatTarget::One(swaplace.contract_address));
+
+                spy_events
+                    .assert_emitted(
+                        @array![
+                            (
+                                swaplace.contract_address,
+                                Swaplace::Event::SwapCreated(
+                                    Swaplace::SwapCreated {
+                                        user: OWNER(),
+                                        swap_id: swap_id,
+                                        allowed: ZERO(),
+                                        expiry: MOCK_BLOCK_TIMESTAMP
+                                    }
+                                )
+                            )
+                        ]
+                    );
+            }
 
             #[test]
             fn test_should_be_able_to_create_a_1_1_swap_with_ERC20() {
@@ -234,7 +280,9 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
+            use swaplace::tests::utils::constants::{
+                ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
+            };
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
             use snforge_std::{declare, ContractClassTrait};
@@ -288,13 +336,18 @@ mod SwaplaceTests {
         use swaplace::tests::utils::swaplace_helper::{
             setup, mock_swap, make_asset, make_swap, compose_swap
         };
-        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
+        use swaplace::tests::utils::constants::{
+            ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
+        };
         use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
         use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
-        use swaplace::Swaplace::{Swap, Asset};
+        use swaplace::Swaplace::{Swaplace, Swap, Asset};
         use swaplace::mocks::MockERC20::{IMockERC20Dispatcher, IMockERC20DispatcherTrait};
         use swaplace::mocks::MockERC721::{IMockERC721Dispatcher, IMockERC721DispatcherTrait};
-        use snforge_std::{CheatTarget, start_prank, stop_prank};
+        use snforge_std::{
+            CheatTarget, start_prank, stop_prank, start_warp, stop_warp, spy_events, SpyOn,
+            EventSpy, EventAssertions
+        };
 
         fn before_each() -> (
             Swap,
@@ -334,13 +387,69 @@ mod SwaplaceTests {
             (swap, biding, asking, swaplace, mock_erc20, mock_erc721)
         }
 
+        #[test]
+        fn test_should_be_emit_event_when_swap_is_accepted() {
+            let (swaplace, mock_erc20, mock_erc721) = setup();
+            mock_erc20.mint_to(OWNER(), 100);
+            mock_erc20.mint_to(ACCEPTEE(), 100);
+
+            let biding_addr = array![mock_erc20.contract_address];
+            let biding_amount_or_id = array![50];
+            let asking_addr = array![mock_erc20.contract_address];
+            let asking_amount_or_id = array![50];
+
+            start_prank(CheatTarget::One(mock_erc20.contract_address), OWNER());
+            mock_erc20.approve(swaplace.contract_address, 50);
+            stop_prank(CheatTarget::One(mock_erc20.contract_address));
+
+            start_prank(CheatTarget::One(mock_erc20.contract_address), ACCEPTEE());
+            mock_erc20.approve(swaplace.contract_address, 50);
+            stop_prank(CheatTarget::One(mock_erc20.contract_address));
+
+            let (swap, biding, asking) = compose_swap(
+                OWNER(),
+                ACCEPTEE(),
+                MOCK_BLOCK_TIMESTAMP,
+                biding_addr.span(),
+                biding_amount_or_id.span(),
+                asking_addr.span(),
+                asking_amount_or_id.span(),
+            );
+            start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
+            let swap_id = swaplace.create_swap(swap, biding, asking);
+            stop_prank(CheatTarget::One(swaplace.contract_address));
+
+            let mut spy_events = spy_events(SpyOn::One(swaplace.contract_address));
+
+            // set block timestamp bf expiry time
+            start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry - 1);
+            start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
+            swaplace.accept_swap(swap_id);
+            stop_prank(CheatTarget::One(swaplace.contract_address));
+            stop_warp(CheatTarget::One(swaplace.contract_address));
+
+            spy_events
+                .assert_emitted(
+                    @array![
+                        (
+                            swaplace.contract_address,
+                            Swaplace::Event::SwapAccepted(
+                                Swaplace::SwapAccepted { user: ACCEPTEE(), swap_id: swap_id, }
+                            )
+                        )
+                    ]
+                );
+        }
+
         mod accepting_different_types_of_swaps {
             use super::before_each;
             use core::array::ArrayTrait;
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
+            use swaplace::tests::utils::constants::{
+                ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
+            };
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
@@ -452,7 +561,9 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
+            use swaplace::tests::utils::constants::{
+                ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
+            };
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
@@ -558,13 +669,18 @@ mod SwaplaceTests {
         use swaplace::tests::utils::swaplace_helper::{
             setup, mock_swap, make_asset, make_swap, compose_swap
         };
-        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
+        use swaplace::tests::utils::constants::{
+            ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
+        };
         use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
         use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
-        use swaplace::Swaplace::{Swap, Asset};
+        use swaplace::Swaplace::{Swaplace, Swap, Asset};
         use swaplace::mocks::MockERC20::{IMockERC20Dispatcher, IMockERC20DispatcherTrait};
         use swaplace::mocks::MockERC721::{IMockERC721Dispatcher, IMockERC721DispatcherTrait};
-        use snforge_std::{CheatTarget, start_prank, stop_prank};
+        use snforge_std::{
+            CheatTarget, start_prank, stop_prank, start_warp, stop_warp, spy_events, SpyOn,
+            EventSpy, EventAssertions
+        };
 
         fn before_each() -> (
             Swap,
@@ -582,8 +698,62 @@ mod SwaplaceTests {
             start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
             let swap_id = swaplace.create_swap(swap, biding, asking);
             stop_prank(CheatTarget::One(swaplace.contract_address));
-            
+
             (swap, biding, asking, swaplace, mock_erc20, mock_erc721)
+        }
+
+        #[test]
+        fn test_should_be_emit_event_when_swap_is_canceled() {
+            let (swaplace, mock_erc20, mock_erc721) = setup();
+            mock_erc20.mint_to(OWNER(), 100);
+            mock_erc20.mint_to(ACCEPTEE(), 100);
+
+            let biding_addr = array![mock_erc20.contract_address];
+            let biding_amount_or_id = array![50];
+            let asking_addr = array![mock_erc20.contract_address];
+            let asking_amount_or_id = array![50];
+
+            start_prank(CheatTarget::One(mock_erc20.contract_address), OWNER());
+            mock_erc20.approve(swaplace.contract_address, 50);
+            stop_prank(CheatTarget::One(mock_erc20.contract_address));
+
+            start_prank(CheatTarget::One(mock_erc20.contract_address), ACCEPTEE());
+            mock_erc20.approve(swaplace.contract_address, 50);
+            stop_prank(CheatTarget::One(mock_erc20.contract_address));
+
+            let (swap, biding, asking) = compose_swap(
+                OWNER(),
+                ACCEPTEE(),
+                MOCK_BLOCK_TIMESTAMP,
+                biding_addr.span(),
+                biding_amount_or_id.span(),
+                asking_addr.span(),
+                asking_amount_or_id.span(),
+            );
+            start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
+            let swap_id = swaplace.create_swap(swap, biding, asking);
+            stop_prank(CheatTarget::One(swaplace.contract_address));
+
+            let mut spy_events = spy_events(SpyOn::One(swaplace.contract_address));
+
+            // set block timestamp bf expiry time
+            start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry - 1);
+            start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
+            swaplace.cancel_swap(swap_id);
+            stop_prank(CheatTarget::One(swaplace.contract_address));
+            stop_warp(CheatTarget::One(swaplace.contract_address));
+
+            spy_events
+                .assert_emitted(
+                    @array![
+                        (
+                            swaplace.contract_address,
+                            Swaplace::Event::SwapCanceled(
+                                Swaplace::SwapCanceled { user: OWNER(), swap_id: swap_id, }
+                            )
+                        )
+                    ]
+                );
         }
 
         mod canceling_swaps {
@@ -592,7 +762,9 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
+            use swaplace::tests::utils::constants::{
+                ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
+            };
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
@@ -635,7 +807,9 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
+            use swaplace::tests::utils::constants::{
+                ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
+            };
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
@@ -663,7 +837,7 @@ mod SwaplaceTests {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
                 // set time 1 sec after the expiration time
                 let block_timestamp = swap.expiry + 1;
-                
+
                 start_warp(CheatTarget::One(swaplace.contract_address), block_timestamp);
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let last_swap = swaplace.get_total_swaps();
@@ -679,7 +853,9 @@ mod SwaplaceTests {
         use swaplace::tests::utils::swaplace_helper::{
             setup, mock_swap, make_asset, make_swap, compose_swap
         };
-        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
+        use swaplace::tests::utils::constants::{
+            ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
+        };
         use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
         use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
         use swaplace::Swaplace::{Swap, Asset};
