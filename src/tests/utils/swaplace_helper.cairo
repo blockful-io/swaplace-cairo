@@ -6,7 +6,7 @@ use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTr
 use swaplace::Swaplace::{Swap, Asset};
 use swaplace::mocks::MockERC20::{IMockERC20Dispatcher, IMockERC20DispatcherTrait};
 use swaplace::mocks::MockERC721::{IMockERC721Dispatcher, IMockERC721DispatcherTrait};
-use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
 
 fn setup() -> (ISwaplaceDispatcher, IMockERC20Dispatcher, IMockERC721Dispatcher) {
     let swaplace = deploy_swaplace();
@@ -27,7 +27,7 @@ fn mock_swap(
     compose_swap(
         OWNER(),
         ZERO(),
-        1000, // get_block_timestamp() * 2
+        MOCK_BLOCK_TIMESTAMP,
         biding_addr.span(),
         biding_amount_or_id.span(),
         asking_addr.span(),

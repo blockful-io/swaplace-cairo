@@ -5,7 +5,7 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
 
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
@@ -21,11 +21,10 @@ mod SwaplaceTests {
                 let asking_addr = array![mock_erc20.contract_address];
                 let asking_amount_or_id = array![50];
 
-                let block_timestamp = 1000; // TODO: get_block_timestamp() * 2
                 let (swap, biding, asking) = compose_swap(
                     OWNER(),
                     ZERO(),
-                    block_timestamp,
+                    MOCK_BLOCK_TIMESTAMP,
                     biding_addr.span(),
                     biding_amount_or_id.span(),
                     asking_addr.span(),
@@ -43,7 +42,7 @@ mod SwaplaceTests {
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
                 assert(swap_result.allowed == ZERO(), 'err allowed');
-                assert(swap_result.expiry == block_timestamp, 'err expiry');
+                assert(swap_result.expiry == MOCK_BLOCK_TIMESTAMP, 'err expiry');
             }
 
             #[test]
@@ -59,11 +58,10 @@ mod SwaplaceTests {
                 ];
                 let asking_amount_or_id = array![50, 100, 150];
 
-                let block_timestamp = 1000; // TODO: get_block_timestamp() * 2
                 let (swap, biding, asking) = compose_swap(
                     OWNER(),
                     ZERO(),
-                    block_timestamp,
+                    MOCK_BLOCK_TIMESTAMP,
                     biding_addr.span(),
                     biding_amount_or_id.span(),
                     asking_addr.span(),
@@ -80,7 +78,7 @@ mod SwaplaceTests {
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
                 assert(swap_result.allowed == ZERO(), 'err allowed');
-                assert(swap_result.expiry == block_timestamp, 'err expiry');
+                assert(swap_result.expiry == MOCK_BLOCK_TIMESTAMP, 'err expiry');
             }
 
             #[test]
@@ -100,11 +98,10 @@ mod SwaplaceTests {
                 ];
                 let asking_amount_or_id = array![50, 100, 150];
 
-                let block_timestamp = 1000; // TODO: get_block_timestamp() * 2
                 let (swap, biding, asking) = compose_swap(
                     OWNER(),
                     ZERO(),
-                    block_timestamp,
+                    MOCK_BLOCK_TIMESTAMP,
                     biding_addr.span(),
                     biding_amount_or_id.span(),
                     asking_addr.span(),
@@ -121,7 +118,7 @@ mod SwaplaceTests {
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
                 assert(swap_result.allowed == ZERO(), 'err allowed');
-                assert(swap_result.expiry == block_timestamp, 'err expiry');
+                assert(swap_result.expiry == MOCK_BLOCK_TIMESTAMP, 'err expiry');
             }
 
             #[test]
@@ -133,11 +130,10 @@ mod SwaplaceTests {
                 let asking_addr = array![mock_erc721.contract_address];
                 let asking_amount_or_id = array![4];
 
-                let block_timestamp = 1000; // TODO: get_block_timestamp() * 2
                 let (swap, biding, asking) = compose_swap(
                     OWNER(),
                     ZERO(),
-                    block_timestamp,
+                    MOCK_BLOCK_TIMESTAMP,
                     biding_addr.span(),
                     biding_amount_or_id.span(),
                     asking_addr.span(),
@@ -154,7 +150,7 @@ mod SwaplaceTests {
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
                 assert(swap_result.allowed == ZERO(), 'err allowed');
-                assert(swap_result.expiry == block_timestamp, 'err expiry');
+                assert(swap_result.expiry == MOCK_BLOCK_TIMESTAMP, 'err expiry');
             }
 
             #[test]
@@ -170,11 +166,10 @@ mod SwaplaceTests {
                 ];
                 let asking_amount_or_id = array![4, 5, 6];
 
-                let block_timestamp = 1000; // TODO: get_block_timestamp() * 2
                 let (swap, biding, asking) = compose_swap(
                     OWNER(),
                     ZERO(),
-                    block_timestamp,
+                    MOCK_BLOCK_TIMESTAMP,
                     biding_addr.span(),
                     biding_amount_or_id.span(),
                     asking_addr.span(),
@@ -191,7 +186,7 @@ mod SwaplaceTests {
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
                 assert(swap_result.allowed == ZERO(), 'err allowed');
-                assert(swap_result.expiry == block_timestamp, 'err expiry');
+                assert(swap_result.expiry == MOCK_BLOCK_TIMESTAMP, 'err expiry');
             }
 
             #[test]
@@ -211,11 +206,10 @@ mod SwaplaceTests {
                 ];
                 let asking_amount_or_id = array![4, 5, 6];
 
-                let block_timestamp = 1000; // TODO: get_block_timestamp() * 2
                 let (swap, biding, asking) = compose_swap(
                     OWNER(),
                     ZERO(),
-                    block_timestamp,
+                    MOCK_BLOCK_TIMESTAMP,
                     biding_addr.span(),
                     biding_amount_or_id.span(),
                     asking_addr.span(),
@@ -232,7 +226,7 @@ mod SwaplaceTests {
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
                 assert(swap_result.allowed == ZERO(), 'err allowed');
-                assert(swap_result.expiry == block_timestamp, 'err expiry');
+                assert(swap_result.expiry == MOCK_BLOCK_TIMESTAMP, 'err expiry');
             }
         }
 
@@ -240,7 +234,7 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
             use snforge_std::{declare, ContractClassTrait};
@@ -296,7 +290,7 @@ mod SwaplaceTests {
         use swaplace::tests::utils::swaplace_helper::{
             setup, mock_swap, make_asset, make_swap, compose_swap
         };
-        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
         use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
         use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
         use swaplace::Swaplace::{Swap, Asset};
@@ -330,11 +324,10 @@ mod SwaplaceTests {
             let asking_addr = array![mock_erc20.contract_address];
             let asking_amount_or_id = array![1000];
 
-            let block_timestamp = 1000; // TODO: get_block_timestamp() * 2
             let (swap, biding, asking) = compose_swap(
                 OWNER(),
                 ZERO(),
-                block_timestamp,
+                MOCK_BLOCK_TIMESTAMP,
                 biding_addr.span(),
                 biding_amount_or_id.span(),
                 asking_addr.span(),
@@ -349,7 +342,7 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
@@ -461,7 +454,7 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
@@ -561,7 +554,7 @@ mod SwaplaceTests {
         use swaplace::tests::utils::swaplace_helper::{
             setup, mock_swap, make_asset, make_swap, compose_swap
         };
-        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
         use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
         use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
         use swaplace::Swaplace::{Swap, Asset};
@@ -595,7 +588,7 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
@@ -637,7 +630,7 @@ mod SwaplaceTests {
             use swaplace::tests::utils::swaplace_helper::{
                 setup, mock_swap, make_asset, make_swap, compose_swap
             };
-            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+            use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
             use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
             use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
             use swaplace::Swaplace::{Swap, Asset};
@@ -676,7 +669,7 @@ mod SwaplaceTests {
         use swaplace::tests::utils::swaplace_helper::{
             setup, mock_swap, make_asset, make_swap, compose_swap
         };
-        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO};
+        use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
         use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
         use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
         use swaplace::Swaplace::{Swap, Asset};
@@ -700,7 +693,7 @@ mod SwaplaceTests {
             let (swap, biding, asking) = compose_swap(
                 OWNER(),
                 ZERO(),
-                1000, // TODO: get_block_timestamp() * 2
+                MOCK_BLOCK_TIMESTAMP,
                 biding_addr.span(),
                 biding_amount_or_id.span(),
                 asking_addr.span(),

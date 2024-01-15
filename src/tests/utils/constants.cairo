@@ -1,5 +1,7 @@
 use starknet::{ContractAddress, contract_address_const};
 
+const MOCK_BLOCK_TIMESTAMP: u64 = 1000;
+
 fn ACCEPTEE() -> ContractAddress {
     contract_address_const::<'ACCEPTEE'>()
 }
