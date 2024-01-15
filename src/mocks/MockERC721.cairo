@@ -15,7 +15,6 @@ mod MockERC721 {
     use openzeppelin::token::erc721::ERC721Component;
     use starknet::{ContractAddress, get_caller_address};
     use super::IMockERC721;
-    use debug::PrintTrait;
 
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);

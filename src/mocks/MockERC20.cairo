@@ -15,8 +15,6 @@ mod MockERC20 {
     use starknet::{ContractAddress, get_caller_address};
     use super::IMockERC20;
 
-    use debug::PrintTrait;
-
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
 
     impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;

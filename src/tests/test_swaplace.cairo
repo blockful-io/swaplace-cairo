@@ -264,8 +264,6 @@ mod SwaplaceTests {
                 start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry * 2);
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 swaplace.create_swap(swap, biding, asking);
-                stop_prank(CheatTarget::One(swaplace.contract_address));
-                stop_warp(CheatTarget::One(swaplace.contract_address));
             }
 
             #[test]
@@ -489,16 +487,22 @@ mod SwaplaceTests {
             #[test]
             #[should_panic(expected: ('Swaplace: Invalid expiry time',))]
             fn test_should_revert_when_expiry_is_smaller_than_block_timestamp() {
-                let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
+                let (mut swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
+                swap.expiry = 500;
 
+                start_warp(CheatTarget::One(swaplace.contract_address), 400);
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
+                stop_warp(CheatTarget::One(swaplace.contract_address));
 
-                start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry * 2);
+                let swap = swaplace.get_swap(swap_id);
 
+                start_warp(CheatTarget::One(swaplace.contract_address), 600);
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 swaplace.accept_swap(swap_id);
+                stop_prank(CheatTarget::One(swaplace.contract_address));
+                stop_warp(CheatTarget::One(swaplace.contract_address));
             }
 
             #[test]
@@ -576,9 +580,9 @@ mod SwaplaceTests {
             );
 
             start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
-            swaplace.create_swap(swap, biding, asking);
+            let swap_id = swaplace.create_swap(swap, biding, asking);
             stop_prank(CheatTarget::One(swaplace.contract_address));
-
+            
             (swap, biding, asking, swaplace, mock_erc20, mock_erc721)
         }
 
@@ -615,10 +619,11 @@ mod SwaplaceTests {
             #[should_panic(expected: ('Swaplace: Invalid expiry time',))]
             fn test_should_not_be_able_to_accept_swap_a_canceled_a_swap() {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
-                start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry * 2);
+                // set time 1 sec after the expiration time
+                let block_timestamp = swap.expiry + 1;
+                start_warp(CheatTarget::One(swaplace.contract_address), block_timestamp);
 
                 let last_swap = swaplace.get_total_swaps();
-                // before each create a swap, thats bc 1 its the last_swap
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 swaplace.accept_swap(last_swap);
             }
@@ -639,28 +644,33 @@ mod SwaplaceTests {
             use snforge_std::{CheatTarget, start_prank, stop_prank, start_warp, stop_warp};
             use openzeppelin::token::erc20::interface::{IERC20Metadata, IERC20, IERC20Camel};
 
-            // TODO: check this
             #[test]
             #[should_panic(expected: ('Swaplace: Invalid address',))]
             fn test_should_revert_when_owner_is_not_caller() {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
+                // set time 1 sec bf the expiration time
+                let block_timestamp = swap.expiry - 1;
 
-                let last_swap = swaplace.get_total_swaps();
-                // before each create a swap, thats bc 1 its the last_swap
+                start_warp(CheatTarget::One(swaplace.contract_address), block_timestamp);
                 start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
-                swaplace.accept_swap(last_swap);
+                let last_swap = swaplace.get_total_swaps();
+                swaplace.cancel_swap(last_swap);
             }
 
             #[test]
             #[should_panic(expected: ('Swaplace: Invalid expiry time',))]
             fn test_should_revert_when_expiry_is_smaller_than_block_timestamp() {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
-
-                let last_swap = swaplace.get_total_swaps();
-                // before each create a swap, thats bc 1 its the last_swap
-                start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry * 2);
+                // set time 1 sec after the expiration time
+                let block_timestamp = swap.expiry + 1;
+                
+                start_warp(CheatTarget::One(swaplace.contract_address), block_timestamp);
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
+                let last_swap = swaplace.get_total_swaps();
+
                 swaplace.cancel_swap(last_swap);
+                stop_warp(CheatTarget::One(swaplace.contract_address));
+                stop_prank(CheatTarget::One(swaplace.contract_address));
             }
         }
     }
