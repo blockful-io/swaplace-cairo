@@ -65,7 +65,7 @@ mod MockERC721 {
             let owner = self.erc721._owner_of(token_id);
 
             let caller = get_caller_address();
-            // assert(owner == caller || self.is_approved_for_all(owner, caller), 'UNAUTHORIZED');
+            assert(owner == caller || self.is_approved_for_all(owner, caller), 'UNAUTHORIZED');
             self.erc721._approve(to, token_id);
         }
 

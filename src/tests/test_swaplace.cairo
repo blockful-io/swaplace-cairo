@@ -3,7 +3,7 @@ mod SwaplaceTests {
         mod creating_different_types_of_swaps {
             use core::array::ArrayTrait;
             use swaplace::tests::utils::swaplace_helper::{
-                setup, mock_swap, make_asset, make_swap, compose_swap
+                setup, mock_swap, make_asset, compose_swap
             };
             use swaplace::tests::utils::constants::{
                 ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
@@ -278,7 +278,7 @@ mod SwaplaceTests {
 
         mod reverts_when_creating_swaps {
             use swaplace::tests::utils::swaplace_helper::{
-                setup, mock_swap, make_asset, make_swap, compose_swap
+                setup, mock_swap, make_asset, compose_swap
             };
             use swaplace::tests::utils::constants::{
                 ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
@@ -333,9 +333,7 @@ mod SwaplaceTests {
 
     mod accepting_swaps {
         use core::array::ArrayTrait;
-        use swaplace::tests::utils::swaplace_helper::{
-            setup, mock_swap, make_asset, make_swap, compose_swap
-        };
+        use swaplace::tests::utils::swaplace_helper::{setup, mock_swap, make_asset, compose_swap};
         use swaplace::tests::utils::constants::{
             ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
         };
@@ -559,7 +557,7 @@ mod SwaplaceTests {
             use super::before_each;
             use core::array::ArrayTrait;
             use swaplace::tests::utils::swaplace_helper::{
-                setup, mock_swap, make_asset, make_swap, compose_swap
+                setup, mock_swap, make_asset, compose_swap
             };
             use swaplace::tests::utils::constants::{
                 ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
@@ -666,9 +664,7 @@ mod SwaplaceTests {
 
     mod canceling_swaps {
         use core::array::ArrayTrait;
-        use swaplace::tests::utils::swaplace_helper::{
-            setup, mock_swap, make_asset, make_swap, compose_swap
-        };
+        use swaplace::tests::utils::swaplace_helper::{setup, mock_swap, make_asset, compose_swap};
         use swaplace::tests::utils::constants::{
             ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
         };
@@ -760,7 +756,7 @@ mod SwaplaceTests {
             use super::before_each;
             use core::array::ArrayTrait;
             use swaplace::tests::utils::swaplace_helper::{
-                setup, mock_swap, make_asset, make_swap, compose_swap
+                setup, mock_swap, make_asset, compose_swap
             };
             use swaplace::tests::utils::constants::{
                 ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
@@ -805,7 +801,7 @@ mod SwaplaceTests {
             use super::before_each;
             use core::array::ArrayTrait;
             use swaplace::tests::utils::swaplace_helper::{
-                setup, mock_swap, make_asset, make_swap, compose_swap
+                setup, mock_swap, make_asset, compose_swap
             };
             use swaplace::tests::utils::constants::{
                 ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
@@ -850,9 +846,7 @@ mod SwaplaceTests {
     }
     mod fetching_swaps {
         use core::array::ArrayTrait;
-        use swaplace::tests::utils::swaplace_helper::{
-            setup, mock_swap, make_asset, make_swap, compose_swap
-        };
+        use swaplace::tests::utils::swaplace_helper::{setup, mock_swap, make_asset, compose_swap};
         use swaplace::tests::utils::constants::{
             ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP
         };

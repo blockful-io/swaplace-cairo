@@ -60,7 +60,7 @@ fn make_swap(
         owner,
         allowed,
         expiry,
-        biding_count: biding.len().into(), // TODO: 
+        biding_count: biding.len().into(),
         asking_count: asking.len().into(),
     }
 }
