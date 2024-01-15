@@ -374,7 +374,7 @@ mod SwaplaceTests {
 
             #[test]
             fn test_should_be_able_to_accept_swap_as_N_N_swap() {
-                let (swap, _, _, swaplace, mock_erc20, mock_erc721) = before_each();
+                let (mut swap, _, _, swaplace, mock_erc20, mock_erc721) = before_each();
 
                 mock_erc20.mint_to(OWNER(), 500);
                 mock_erc721.mint_to(ACCEPTEE(), 5);
@@ -395,6 +395,9 @@ mod SwaplaceTests {
                     make_asset(mock_erc20.contract_address, 1000),
                     make_asset(mock_erc721.contract_address, 5)
                 ];
+
+                swap.biding_count = 2;
+                swap.asking_count = 2;
 
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 swaplace.create_swap(swap, biding.span(), asking.span());

@@ -11,8 +11,8 @@ struct Swap {
     owner: ContractAddress,
     allowed: ContractAddress,
     expiry: u64,
-    biding_count: u64,
-    asking_count: u64,
+    biding_count: u32,
+    asking_count: u32,
 }
 
 #[starknet::contract]
@@ -30,8 +30,8 @@ mod Swaplace {
     struct Storage {
         total_swaps: u256,
         swaps: LegacyMap<u256, Swap>,
-        swaps_biding: LegacyMap<(u256, u64), Asset>,
-        swaps_asking: LegacyMap<(u256, u64), Asset>,
+        swaps_biding: LegacyMap<(u256, u32), Asset>,
+        swaps_asking: LegacyMap<(u256, u32), Asset>,
     }
 
     // Events of Swaplace
@@ -87,7 +87,7 @@ mod Swaplace {
             assert(swap.owner == get_caller_address(), Errors::INVALID_ADDRESS);
             assert(swap.expiry >= get_block_timestamp(), Errors::INVALID_EXPIRY);
             assert(biding.len() > 0 && asking.len() > 0, Errors::INVALID_ASSETS_LENGTH);
-            // TODO: len
+            assert(biding.len() == swap.biding_count && asking.len() == swap.asking_count, Errors::INVALID_ASSETS_LENGTH);
 
             let mut swap_id = self.total_swaps.read();
             swap_id += 1;
@@ -95,23 +95,21 @@ mod Swaplace {
 
             self.swaps.write(swap_id, swap);
 
-            let mut i: u64 = 0;
+            let mut i = 0;
             loop {
                 if i == swap.biding_count {
                     break;
                 }
-                // TODO: 
-                self.swaps_biding.write((swap_id, i), *biding.at(i.try_into().unwrap()));
+                self.swaps_biding.write((swap_id, i), *biding.at(i));
                 i += 1;
             };
 
-            let mut i: u64 = 0;
+            let mut i = 0;
             loop {
                 if i == swap.asking_count {
                     break;
                 }
-                // TODO: 
-                self.swaps_asking.write((swap_id, i), *asking.at(i.try_into().unwrap()));
+                self.swaps_asking.write((swap_id, i), *asking.at(i));
                 i += 1;
             };
 
@@ -131,9 +129,6 @@ mod Swaplace {
         fn accept_swap(ref self: ContractState, swap_id: u256) -> bool {
             let mut swap = self.swaps.read(swap_id);
 
-            // if (swap.allowed != address(0) && swap.allowed != msg.sender)
-            // revert InvalidAddress(msg.sender);
-
             assert(
                 swap.allowed.is_zero() || swap.allowed == get_caller_address(), Errors::INVALID_ADDRESS
             );
@@ -142,7 +137,7 @@ mod Swaplace {
             swap.expiry = 0;
             self.swaps.write(swap_id, swap);
 
-            let mut i: u64 = 0;
+            let mut i = 0;
             loop {
                 if i == swap.asking_count {
                     break;
@@ -153,7 +148,7 @@ mod Swaplace {
                 i += 1;
             };
 
-            let mut i: u64 = 0;
+            let mut i = 0;
             loop {
                 if i == swap.biding_count {
                     break;
