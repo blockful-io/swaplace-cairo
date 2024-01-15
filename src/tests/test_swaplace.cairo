@@ -32,12 +32,13 @@ mod SwaplaceTests {
                     asking_amount_or_id.span(),
                 );
 
+                let total_swaps_bf = swaplace.get_total_swaps();
+
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                // let total_swaps_result = swaplace.total_swaps();
-                // assert(total_swaps_result == 1, 'err total_swaps');
+                assert(swaplace.get_total_swaps() == total_swaps_bf + 1, 'err total_swaps');
 
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
@@ -69,12 +70,12 @@ mod SwaplaceTests {
                     asking_amount_or_id.span(),
                 );
 
+                let total_swaps_bf = swaplace.get_total_swaps();
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                // let total_swaps_result = swaplace.total_swaps();
-                // assert(total_swaps_result == 1, 'err total_swaps');
+                assert(swaplace.get_total_swaps() == total_swaps_bf + 1, 'err total_swaps');
 
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
@@ -110,12 +111,12 @@ mod SwaplaceTests {
                     asking_amount_or_id.span(),
                 );
 
+                let total_swaps_bf = swaplace.get_total_swaps();
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                // let total_swaps_result = swaplace.total_swaps();
-                // assert(total_swaps_result == 1, 'err total_swaps');
+                assert(swaplace.get_total_swaps() == total_swaps_bf + 1, 'err total_swaps');
 
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
@@ -143,12 +144,12 @@ mod SwaplaceTests {
                     asking_amount_or_id.span(),
                 );
 
+                let total_swaps_bf = swaplace.get_total_swaps();
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                // let total_swaps_result = swaplace.total_swaps();
-                // assert(total_swaps_result == 1, 'err total_swaps');
+                assert(swaplace.get_total_swaps() == total_swaps_bf + 1, 'err total_swaps');
 
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
@@ -180,12 +181,12 @@ mod SwaplaceTests {
                     asking_amount_or_id.span(),
                 );
 
+                let total_swaps_bf = swaplace.get_total_swaps();
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                // let total_swaps_result = swaplace.total_swaps();
-                // assert(total_swaps_result == 1, 'err total_swaps');
+                assert(swaplace.get_total_swaps() == total_swaps_bf + 1, 'err total_swaps');
 
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
@@ -221,12 +222,12 @@ mod SwaplaceTests {
                     asking_amount_or_id.span(),
                 );
 
+                let total_swaps_bf = swaplace.get_total_swaps();
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                // let total_swaps_result = swaplace.total_swaps();
-                // assert(total_swaps_result == 1, 'err total_swaps');
+                assert(swaplace.get_total_swaps() == total_swaps_bf + 1, 'err total_swaps');
 
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
@@ -252,7 +253,7 @@ mod SwaplaceTests {
                 let (swap, biding, asking) = mock_swap(
                     mock_erc20.contract_address, mock_erc721.contract_address
                 );
-                
+
                 start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry * 2);
                 start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
                 swaplace.create_swap(swap, biding, asking);
@@ -362,14 +363,14 @@ mod SwaplaceTests {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
 
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
-                swaplace.create_swap(swap, biding, asking);
+                let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
                 start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
-                swaplace.accept_swap(1);
+                swaplace.accept_swap(swap_id);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
-                // let swap_result = swaplace.get_swap(swaplace.total_swaps());
-                // assert(swap_result.expiry == 0, 'err expiry');
+                let swap_result = swaplace.get_swap(swap_id);
+                assert(swap_result.expiry == 0, 'err expiry');
             }
 
             #[test]
@@ -400,22 +401,19 @@ mod SwaplaceTests {
                 swap.asking_count = 2;
 
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
-                swaplace.create_swap(swap, biding.span(), asking.span());
+                let swap_id = swaplace.create_swap(swap, biding.span(), asking.span());
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                // let total_swaps_result = swaplace.total_swaps();
-                // assert(total_swaps_result == 1, 'err total_swaps');
-
-                let swap_result = swaplace.get_swap(1);
+                let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
                 assert(swap_result.allowed == ZERO(), 'err allowed');
                 assert(swap_result.expiry == swap.expiry, 'err expiry');
 
                 start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
-                swaplace.accept_swap(2);
+                swaplace.accept_swap(swap_id);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                let swap_result = swaplace.get_swap(2);
+                let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.expiry == 0, 'err expiry');
             }
 
@@ -442,9 +440,6 @@ mod SwaplaceTests {
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
-
-                // let total_swaps_result = swaplace.total_swaps();
-                // assert(total_swaps_result == 2, 'err total_swaps');
 
                 let swap_result = swaplace.get_swap(swap_id);
                 assert(swap_result.owner == OWNER(), 'err owner');
@@ -555,14 +550,6 @@ mod SwaplaceTests {
                 let swap_id = swaplace.create_swap(swap, biding, asking);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                // let total_swaps_result = swaplace.total_swaps();
-                // assert(total_swaps_result == 1, 'err total_swaps');
-
-                // let swap_result = swaplace.get_swap(swaplace.total_swaps());
-                // assert(swap_result.owner == OWNER(), 'err owner');
-                // assert(swap_result.allowed == DEPLOYER(), 'err allowed');
-                // assert(swap_result.expiry == swap.expiry, 'err expiry');
-
                 start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
                 swaplace.accept_swap(swap_id);
             }
@@ -621,12 +608,13 @@ mod SwaplaceTests {
             fn test_should_be_able_to_cancel_swap_a_swap() {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
 
+                let last_swap = swaplace.get_total_swaps();
                 // before each create a swap, thats bc 1 its the last_swap
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
-                swaplace.cancel_swap(1);
+                swaplace.cancel_swap(last_swap);
                 stop_prank(CheatTarget::One(swaplace.contract_address));
 
-                let swap_result = swaplace.get_swap(1);
+                let swap_result = swaplace.get_swap(last_swap);
                 assert(swap_result.expiry == 0, 'err expiry');
             }
 
@@ -636,9 +624,10 @@ mod SwaplaceTests {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
                 start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry * 2);
 
+                let last_swap = swaplace.get_total_swaps();
                 // before each create a swap, thats bc 1 its the last_swap
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
-                swaplace.accept_swap(1);
+                swaplace.accept_swap(last_swap);
             }
         }
 
@@ -657,32 +646,32 @@ mod SwaplaceTests {
             use snforge_std::{CheatTarget, start_prank, stop_prank, start_warp, stop_warp};
             use openzeppelin::token::erc20::interface::{IERC20Metadata, IERC20, IERC20Camel};
 
+            // TODO: check this
+            #[test]
+            #[should_panic(expected: ('Swaplace: Invalid address',))]
+            fn test_should_revert_when_owner_is_not_caller() {
+                let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
 
-            // TODO: Check this test
-            // #[test]
-            // #[should_panic(expected: ('Swaplace: Invalid address',))]
-            // fn test_should_revert_when_owner_is_not_caller() {
-            //     let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
-
-            //     // before each create a swap, thats bc 1 its the last_swap
-            //     start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
-            //     swaplace.accept_swap(2);
-            // }
+                let last_swap = swaplace.get_total_swaps();
+                // before each create a swap, thats bc 1 its the last_swap
+                start_prank(CheatTarget::One(swaplace.contract_address), ACCEPTEE());
+                swaplace.accept_swap(last_swap);
+            }
 
             #[test]
             #[should_panic(expected: ('Swaplace: Invalid expiry time',))]
             fn test_should_revert_when_expiry_is_smaller_than_block_timestamp() {
                 let (swap, biding, asking, swaplace, mock_erc20, mock_erc721) = before_each();
 
+                let last_swap = swaplace.get_total_swaps();
                 // before each create a swap, thats bc 1 its the last_swap
                 start_warp(CheatTarget::One(swaplace.contract_address), swap.expiry * 2);
                 start_prank(CheatTarget::One(swaplace.contract_address), OWNER());
-                swaplace.cancel_swap(1);
+                swaplace.cancel_swap(last_swap);
             }
         }
     }
     mod fetching_swaps {
-
         use core::array::ArrayTrait;
         use swaplace::tests::utils::swaplace_helper::{
             setup, mock_swap, make_asset, make_swap, compose_swap
@@ -729,8 +718,8 @@ mod SwaplaceTests {
         fn test_should_be_able_to_get_swap() {
             let swaplace = before_each();
 
-            // let last_swap =  swaplace.get_total_swaps();
-            let fetched_swap =  swaplace.get_swap(1); // TODO:
+            let last_swap = swaplace.get_total_swaps();
+            let fetched_swap = swaplace.get_swap(last_swap);
 
             assert(fetched_swap.owner != ZERO(), 'err owner');
             // swap.allowed can be the zero address and shoul not be trusted for validation
@@ -744,7 +733,7 @@ mod SwaplaceTests {
             let swaplace = before_each();
 
             let imaginary_swap_id = 777;
-            let fetched_swap =  swaplace.get_swap(imaginary_swap_id);
+            let fetched_swap = swaplace.get_swap(imaginary_swap_id);
 
             assert(fetched_swap.owner == ZERO(), 'err owner');
             // swap.allowed can be the zero address and shoul not be trusted for validation

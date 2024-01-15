@@ -87,7 +87,10 @@ mod Swaplace {
             assert(swap.owner == get_caller_address(), Errors::INVALID_ADDRESS);
             assert(swap.expiry >= get_block_timestamp(), Errors::INVALID_EXPIRY);
             assert(biding.len() > 0 && asking.len() > 0, Errors::INVALID_ASSETS_LENGTH);
-            assert(biding.len() == swap.biding_count && asking.len() == swap.asking_count, Errors::INVALID_ASSETS_LENGTH);
+            assert(
+                biding.len() == swap.biding_count && asking.len() == swap.asking_count,
+                Errors::INVALID_ASSETS_LENGTH
+            );
 
             let mut swap_id = self.total_swaps.read();
             swap_id += 1;
@@ -130,7 +133,8 @@ mod Swaplace {
             let mut swap = self.swaps.read(swap_id);
 
             assert(
-                swap.allowed.is_zero() || swap.allowed == get_caller_address(), Errors::INVALID_ADDRESS
+                swap.allowed.is_zero() || swap.allowed == get_caller_address(),
+                Errors::INVALID_ADDRESS
             );
             assert(swap.expiry >= get_block_timestamp(), Errors::INVALID_EXPIRY);
 
@@ -177,18 +181,8 @@ mod Swaplace {
         fn get_swap(self: @ContractState, swap_id: u256) -> Swap {
             self.swaps.read(swap_id)
         }
-    }
 
-    #[generate_trait]
-    impl InternalImpl of InternalTrait {
-        // Retrieves the total number of swaps that have been created in the contract.
-        //
-        // Returns:
-        // - `u256`: The total number of swaps.
-        //
-        // NOTE: This function provides the count of all swaps, including those that have been accepted,
-        // canceled, or expired. It does not filter based on the current state of the swaps.
-        fn _total_swaps(self: @ContractState) -> u256 {
+        fn get_total_swaps(self: @ContractState) -> u256 {
             self.total_swaps.read()
         }
     }
