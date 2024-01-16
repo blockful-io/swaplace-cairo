@@ -3,7 +3,7 @@ use snforge_std::{CheatTarget, start_prank, stop_prank};
 
 use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
 use swaplace::interfaces::ISwaplace::{ISwaplaceDispatcher, ISwaplaceDispatcherTrait};
-use swaplace::Swaplace::{Swap, Asset};
+use swaplace::Swaplace::{Swap, Asset, Swaplace::Errors};
 use swaplace::mocks::MockERC20::{IMockERC20Dispatcher, IMockERC20DispatcherTrait};
 use swaplace::mocks::MockERC721::{IMockERC721Dispatcher, IMockERC721DispatcherTrait};
 use swaplace::tests::utils::constants::{ACCEPTEE, OWNER, DEPLOYER, ZERO, MOCK_BLOCK_TIMESTAMP};
@@ -47,14 +47,8 @@ fn make_swap(
     asking: Span<Asset>,
 ) -> Swap {
     // check for the current `block.timestamp` because `expiry` cannot be in the past
-    // let timestamp = (await ethers.provider.getBlock("latest")).timestamp;
-    // if expiry < timestamp {
-    //     throw new Error("InvalidExpiry");
-    // }
-
-    // if biding.len() == 0 || asking.len() == 0 {
-    //     throw new Error("InvalidAssetsLength");
-    // }
+    assert(!(expiry < get_block_timestamp()), Errors::INVALID_EXPIRY);
+    assert(!(biding.len() == 0 || asking.len() == 0), Errors::INVALID_ASSETS_LENGTH);
 
     Swap {
         owner,
@@ -75,12 +69,11 @@ fn compose_swap(
     asking_amount_or_id: Span<u256>,
 ) -> (Swap, Span<Asset>, Span<Asset>) {
     // lenght of addresses and their respective amounts must be equal
-    // if (
-    //     bidingAddr.length != bidingAmountOrId.length ||
-    //     askingAddr.length != askingAmountOrId.length
-    // ) {
-    //     throw new Error("InvalidAssetsLength");
-    // }
+    assert(
+        !(biding_addr.len() != biding_amount_or_id.len()
+            || asking_addr.len() != asking_amount_or_id.len()),
+        Errors::INVALID_ASSETS_LENGTH
+    );
 
     // push new assets to the array of bids and asks
     let mut biding = array![];

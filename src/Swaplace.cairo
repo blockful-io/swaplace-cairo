@@ -79,7 +79,7 @@ mod Swaplace {
     #[abi(embed_v0)]
     impl ISwaplaceImpl of ISwaplace<ContractState> {
         fn create_swap(
-            ref self: ContractState, swap: Swap, biding: Span<Asset>, asking: Span<Asset>
+            ref self: ContractState, swap: Swap, mut biding: Span<Asset>, mut asking: Span<Asset>
         ) -> u256 {
             assert(swap.owner == get_caller_address(), Errors::INVALID_ADDRESS);
             assert(swap.expiry >= get_block_timestamp(), Errors::INVALID_EXPIRY);
@@ -89,8 +89,7 @@ mod Swaplace {
                 Errors::INVALID_ASSETS_LENGTH
             );
 
-            let mut swap_id = self.total_swaps.read();
-            swap_id += 1;
+            let swap_id = self.total_swaps.read() + 1;
             self.total_swaps.write(swap_id);
 
             self.swaps.write(swap_id, swap);
@@ -104,7 +103,7 @@ mod Swaplace {
                 i += 1;
             };
 
-            let mut i = 0;
+            i = 0;
             loop {
                 if i == swap.asking_count {
                     break;
